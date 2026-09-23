@@ -38,6 +38,10 @@ dask.multiprocessing.pack_exception(e,dumps)
 dask.multiprocessing.remote_exception(exc,tb)
 
 
+----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.15.4/lib/python3.6/site-packages/dask/__init__.py----------------------------------------
+A:dask.__init__.versions->get_versions()
+
+
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.15.4/lib/python3.6/site-packages/dask/local.py----------------------------------------
 A:dask.local.cache->dict()
 A:dask.local.data_keys->set()
@@ -65,6 +69,7 @@ A:dask.local.(key, res_info, failed)->queue_get(queue)
 A:dask.local.(exc, tb)->loads(res_info)
 A:dask.local.(res, worker_id)->loads(res_info)
 A:dask.local.res->func(*args, **kwds)
+dask.get(dsk,keys,**kwargs)
 dask.local._execute_task(arg,cache,dsk=None)
 dask.local.apply_sync(func,args=(),kwds={},callback=None)
 dask.local.default_get_id()
@@ -204,6 +209,7 @@ dask.core.quote(x)
 dask.core.reverse_dict(d)
 dask.core.subs(task,key,val)
 dask.core.toposort(dsk,dependencies=None)
+dask.istask(x)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.15.4/lib/python3.6/site-packages/dask/utils.py----------------------------------------
@@ -336,6 +342,7 @@ dask.sharedict.merge(*dicts)
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.15.4/lib/python3.6/site-packages/dask/_version.py----------------------------------------
 dask._version.get_versions()
+dask.get_versions()
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.15.4/lib/python3.6/site-packages/dask/context.py----------------------------------------
@@ -355,6 +362,10 @@ dask.context.set_options(self,**kwargs)
 dask.context.set_options.__enter__(self)
 dask.context.set_options.__exit__(self,type,value,traceback)
 dask.context.set_options.__init__(self,**kwargs)
+dask.set_options(self,**kwargs)
+dask.set_options.__enter__(self)
+dask.set_options.__exit__(self,type,value,traceback)
+dask.set_options.__init__(self,**kwargs)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.15.4/lib/python3.6/site-packages/dask/hashing.py----------------------------------------
@@ -486,7 +497,10 @@ dask.base.register_numpy()
 dask.base.register_pandas()
 dask.base.tokenize(*args,**kwargs)
 dask.base.visualize(*args,**kwargs)
+dask.compute(*args,**kwargs)
 dask.dataframe.compute(*args,**kwargs)
+dask.persist(*args,**kwargs)
+dask.visualize(*args,**kwargs)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.15.4/lib/python3.6/site-packages/dask/rewrite.py----------------------------------------
@@ -574,6 +588,7 @@ A:dask.delayed.method->delayed(right(op) if inv else op, pure=True)
 A:dask.delayed.dask_key_name->kwargs.pop('dask_key_name', None)
 A:dask.delayed.args_dasks->list(map(to_task_dask, args))
 A:dask.delayed.(dask_kwargs, dsk2)->to_task_dask(kwargs)
+dask.delayed(obj,name=None,pure=None,nout=None,traverse=True)
 dask.delayed.Delayed(self,key,dsk,length=None)
 dask.delayed.Delayed.__bool__(self)
 dask.delayed.Delayed.__dir__(self)

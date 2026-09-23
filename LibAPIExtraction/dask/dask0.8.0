@@ -1,4 +1,38 @@
 
+----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/threaded.py----------------------------------------
+A:dask.threaded.default_pool->ThreadPool()
+A:dask.threaded.pool->ThreadPool(num_workers)
+A:dask.threaded.queue->Queue()
+A:dask.threaded.results->get_async(pool.apply_async, len(pool._pool), dsk, result, cache=cache, queue=queue, get_id=_thread_get_id, **kwargs)
+dask.threaded._thread_get_id()
+dask.threaded.get(dsk,result,cache=None,num_workers=None,**kwargs)
+
+
+----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/multiprocessing.py----------------------------------------
+A:dask.multiprocessing.pool->multiprocessing.Pool(num_workers)
+A:dask.multiprocessing.manager->multiprocessing.Manager()
+A:dask.multiprocessing.queue->multiprocessing.Manager().Queue()
+A:dask.multiprocessing.apply_async->pickle_apply_async(pool.apply_async, func_dumps=func_dumps, func_loads=func_loads)
+A:dask.multiprocessing.dsk2->fuse(dsk, keys)
+A:dask.multiprocessing.dsk3->pipe(dsk2, partial(cull, keys=keys), *optimizations)
+A:dask.multiprocessing.result->get_async(apply_async, len(pool._pool), dsk3, keys, queue=queue, get_id=_process_get_id, **kwargs)
+A:dask.multiprocessing.func->loads(sfunc)
+A:dask.multiprocessing.args->loads(sargs)
+A:dask.multiprocessing.kwds->loads(skwds)
+A:dask.multiprocessing.sfunc->dumps(func)
+A:dask.multiprocessing.sargs->dumps(args)
+A:dask.multiprocessing.skwds->dumps(kwds)
+dask.multiprocessing._dumps(x)
+dask.multiprocessing._process_get_id()
+dask.multiprocessing._reduce_method_descriptor(m)
+dask.multiprocessing.apply_func(sfunc,sargs,skwds,loads=None)
+dask.multiprocessing.get(dsk,keys,optimizations=[],num_workers=None,func_loads=None,func_dumps=None,**kwargs)
+dask.multiprocessing.pickle_apply_async(apply_async,func,args=(),kwds={},func_loads=None,func_dumps=None)
+
+
+----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/__init__.py----------------------------------------
+
+
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/compatibility.py----------------------------------------
 A:dask.compatibility.self.__obj->gzip.GzipFile(*args, **kwargs)
 dask.compatibility.bind_method(cls,name,func)
@@ -105,6 +139,7 @@ dask.core.quote(x)
 dask.core.reverse_dict(d)
 dask.core.subs(task,key,val)
 dask.core.toposort(dsk)
+dask.istask(x)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/utils.py----------------------------------------
@@ -185,6 +220,10 @@ dask.context.set_options(self,**kwargs)
 dask.context.set_options.__enter__(self)
 dask.context.set_options.__exit__(self,type,value,traceback)
 dask.context.set_options.__init__(self,**kwargs)
+dask.set_options(self,**kwargs)
+dask.set_options.__enter__(self)
+dask.set_options.__exit__(self,type,value,traceback)
+dask.set_options.__init__(self,**kwargs)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/callbacks.py----------------------------------------
@@ -276,6 +315,7 @@ dask.async.release_data(key,state,delete=True)
 dask.async.remote_exception(exc,tb)
 dask.async.sortkey(item)
 dask.async.start_state_from_dask(dsk,cache=None,sortkey=None)
+dask.get(dsk,keys,**kwargs)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/base.py----------------------------------------
@@ -310,7 +350,9 @@ dask.base.normalize_object(o)
 dask.base.normalize_seq(seq)
 dask.base.tokenize(*args,**kwargs)
 dask.base.visualize(*args,**kwargs)
+dask.compute(*args,**kwargs)
 dask.dataframe.compute(*args,**kwargs)
+dask.visualize(*args,**kwargs)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/rewrite.py----------------------------------------
@@ -414,6 +456,7 @@ A:dask.imperative.__sub__->do(operator.sub, True)
 A:dask.imperative.__truediv__->do(operator.truediv, True)
 A:dask.imperative.__xor__->do(operator.xor, True)
 A:dask.imperative.(task, dasks)->to_task_dasks(val)
+dask.do(func,pure=False)
 dask.imperative.Value(self,name,dasks)
 dask.imperative.Value.__bool__(self)
 dask.imperative.Value.__dir__(self)
@@ -438,6 +481,7 @@ dask.imperative.to_task_dasks(expr)
 dask.imperative.tokenize(*args,**kwargs)
 dask.imperative.unzip(ls,nout)
 dask.imperative.value(val,name=None)
+dask.value(val,name=None)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/cache.py----------------------------------------
@@ -1107,6 +1151,15 @@ dask.array.triu(m,k=0)
 dask.array.unique(x)
 dask.array.vstack(tup)
 dask.array.where(condition,x=None,y=None)
+
+
+----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/array/utils.py----------------------------------------
+A:dask.array.utils.a->a.compute(get=get_sync).compute(get=get_sync)
+A:dask.array.utils.adt->getattr(a, 'dtype', None)
+A:dask.array.utils.b->b.compute(get=get_sync).compute(get=get_sync)
+A:dask.array.utils.bdt->getattr(b, 'dtype', None)
+A:dask.array.utils.diff->difflib.ndiff(str(adt).splitlines(), str(bdt).splitlines())
+dask.array.utils.assert_eq(a,b,**kwargs)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/array/optimization.py----------------------------------------
@@ -2000,6 +2053,24 @@ dask.dataframe.groupby._groupby_getitem_apply(df,ind,key,func)
 dask.dataframe.groupby._groupby_level0_getitem_apply(df,key,func)
 
 
+----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/dataframe/utils.py----------------------------------------
+A:dask.dataframe.utils.divisions->numpy.array(divisions)
+A:dask.dataframe.utils.df->df.sort_index().sort_index()
+A:dask.dataframe.utils.index->index.as_ordered().as_ordered()
+A:dask.dataframe.utils.indices->index.as_ordered().as_ordered().searchsorted(divisions)
+A:dask.dataframe.utils.PANDAS_VERSION->LooseVersion(pd.__version__)
+A:dask.dataframe.utils.result->dsk.compute(get=get_sync)
+A:dask.dataframe.utils.msg->'Unsupported dask instance {0} found'.format(type(dsk))
+A:dask.dataframe.utils.a->_maybe_sort(a)
+A:dask.dataframe.utils.b->_maybe_sort(b)
+dask.dataframe.utils._check_dask(dsk,check_names=True)
+dask.dataframe.utils._maybe_sort(a)
+dask.dataframe.utils.assert_dask_graph(dask,label)
+dask.dataframe.utils.eq(a,b,check_names=True,**kwargs)
+dask.dataframe.utils.shard_df_on_index(df,divisions)
+dask.dataframe.utils.unique(divisions)
+
+
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/dataframe/multi.py----------------------------------------
 A:dask.dataframe.multi.divisions->tuple(divisions[min(present):max(present) + 2])
 A:dask.dataframe.multi.result->pandas.merge(left, right, how=how, left_on=left_on, right_on=right_on, left_index=left_index, right_index=right_index, suffixes=suffixes)
@@ -2077,6 +2148,89 @@ dask.dataframe.demo.make_int(n,rstate)
 dask.dataframe.demo.make_string(n,rstate)
 dask.dataframe.demo.make_timeseries(start,end,dtypes,freq,partition_freq,seed=None)
 dask.dataframe.demo.make_timeseries_part(start,end,dtypes,freq,seed)
+
+
+----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/dataframe/io.py----------------------------------------
+A:dask.dataframe.io.lock->Lock()
+A:dask.dataframe.io.kwargs->kwargs.copy().copy()
+A:dask.dataframe.io.linesep->kwargs.copy().copy().get('lineterminator', os.linesep)
+A:dask.dataframe.io.encoding->kwargs.copy().copy().pop('encoding', system_encoding)
+A:dask.dataframe.io.block->StringIO(u''.join(textblock(fn, start, end, compression, encoding, linesep)))
+A:dask.dataframe.io.match->re.match('cannot safely convert passed user dtype of (?P<old_dtype>\\S+) for (?P<new_dtype>\\S+) dtyped data in column (?P<column_number>\\d+)', e.args[0])
+A:dask.dataframe.io.d->re.match('cannot safely convert passed user dtype of (?P<old_dtype>\\S+) for (?P<new_dtype>\\S+) dtyped data in column (?P<column_number>\\d+)', e.args[0]).groupdict()
+A:dask.dataframe.io.sample_nrows->kwargs.copy().copy().pop('sample_nrows', 1000)
+A:dask.dataframe.io.filenames->sorted(glob(fn))
+A:dask.dataframe.io.kwargs['compression']->infer_compression(fn)
+A:dask.dataframe.io.kwargs['names']->_csv_names(fn, **kwargs)
+A:dask.dataframe.io.head->pandas.read_csv(fn, **kwargs)
+A:dask.dataframe.io.new_dtype->dict(head.dtypes)
+A:dask.dataframe.io.dtype->kwargs.copy().copy().get('dtype', dict())
+A:dask.dataframe.io.head.columns->pandas.read_csv(fn, **kwargs).columns.map(lambda s: s.strip() if isinstance(s, str) else s)
+A:dask.dataframe.io.df->pandas.read_csv(fn, encoding=encoding, compression=compression, names=names, **kwargs)
+A:dask.dataframe.io.chunkbytes->kwargs.copy().copy().pop('chunkbytes', 2 ** 25)
+A:dask.dataframe.io.index->kwargs.copy().copy().pop('index', None)
+A:dask.dataframe.io.(head, kwargs)->_fill_kwargs(fn, **kwargs)
+A:dask.dataframe.io.token->tokenize((path, os.path.getmtime(path), key, start, stop, columns, chunksize))
+A:dask.dataframe.io.bom->get_bom(fn, kwargs.get('compression', None))
+A:dask.dataframe.io.total_bytes->file_size(fn, kwargs['compression'])
+A:dask.dataframe.io.nchunks->int(ceil(total_bytes / chunkbytes))
+A:dask.dataframe.io.first_kwargs->merge(kwargs, dict(compression=None))
+A:dask.dataframe.io.rest_kwargs->merge(kwargs, dict(header=None, compression=None))
+A:dask.dataframe.io.dsk->merge((df.dask for df in dfs))
+A:dask.dataframe.io.result->pandas.read_hdf(path, key, **kwargs)
+A:dask.dataframe.io.cols->tuple(x.dtype.names)
+A:dask.dataframe.io.data[c]->numpy.array([], dtype=dt)
+A:dask.dataframe.io.data->data.sort_index(ascending=True).sort_index(ascending=True)
+A:dask.dataframe.io.dummy->_dummy_from_array(x, columns)
+A:dask.dataframe.io.divisions->dask.array.percentile(a, q).compute()
+A:dask.dataframe.io.nrows->len(data)
+A:dask.dataframe.io.chunksize->int(ceil(nrows / npartitions))
+A:dask.dataframe.io.x->Castra(x, readonly=True)
+A:dask.dataframe.io.bc_chunklen->max((x[name].chunklen for name in x.names))
+A:dask.dataframe.io.categories->dict()
+A:dask.dataframe.io.a->dask.array.from_array(x[index], chunks=(chunksize * len(x.names),))
+A:dask.dataframe.io.categories[name]->dask.array.unique(a)
+A:dask.dataframe.io.columns->list(pd.read_hdf(path, key, stop=0).columns)
+A:dask.dataframe.io.q->numpy.linspace(0, 100, len(x) // chunksize + 2)
+A:dask.dataframe.io.chunk->pandas.Categorical.from_codes(np.searchsorted(categories[columns], chunk), categories[columns], True)
+A:dask.dataframe.io.pd_to_hdf->getattr(df._partition_type, 'to_hdf')
+A:dask.dataframe.io.storer->hdf.get_storer(k)
+A:dask.dataframe.io.(keys, stops)->get_keys_and_stops(path, key, stop)
+A:dask.dataframe.io.paths->sorted(glob(pattern))
+A:dask.dataframe.io.(c, _)->core.DataFrame._get(dsk, keys, get=get_sync)
+A:dask.dataframe.io.myget->kwargs.copy().copy().pop('get', None)
+A:dask.dataframe.io.kwargs2->kwargs.copy().copy().copy()
+A:dask.dataframe.io.dsk2->dict(zip(names, values))
+dask.dataframe.from_array(x,chunksize=50000,columns=None)
+dask.dataframe.from_bcolz(x,chunksize=None,categorize=True,index=None,**kwargs)
+dask.dataframe.from_castra(x,columns=None)
+dask.dataframe.from_dask_array(x,columns=None)
+dask.dataframe.from_imperative(dfs,columns,divisions=None)
+dask.dataframe.from_pandas(data,npartitions,sort=True)
+dask.dataframe.io._clean_kwargs(kwargs)
+dask.dataframe.io._csv_names(fn,encoding='utf-8',compression=None,names=None,parse_dates=None,usecols=None,dtype=None,**kwargs)
+dask.dataframe.io._dummy_from_array(x,columns=None)
+dask.dataframe.io._fill_kwargs(fn,**kwargs)
+dask.dataframe.io._link(token,result)
+dask.dataframe.io._pd_read_hdf(path,key,lock,kwargs)
+dask.dataframe.io._read_csv(fn,i,chunkbytes,compression,kwargs,bom)
+dask.dataframe.io._read_single_hdf(path,key,start=0,stop=None,columns=None,chunksize=int(1000000.0),lock=None)
+dask.dataframe.io.dataframe_from_ctable(x,slc,columns=None,categories=None)
+dask.dataframe.io.from_array(x,chunksize=50000,columns=None)
+dask.dataframe.io.from_bcolz(x,chunksize=None,categorize=True,index=None,**kwargs)
+dask.dataframe.io.from_castra(x,columns=None)
+dask.dataframe.io.from_dask_array(x,columns=None)
+dask.dataframe.io.from_imperative(dfs,columns,divisions=None)
+dask.dataframe.io.from_pandas(data,npartitions,sort=True)
+dask.dataframe.io.locked_df_from_ctable(*args,**kwargs)
+dask.dataframe.io.read_csv(fn,**kwargs)
+dask.dataframe.io.read_hdf(pattern,key,start=0,stop=None,columns=None,chunksize=1000000,lock=True)
+dask.dataframe.io.to_bag(df,index=False)
+dask.dataframe.io.to_castra(df,fn=None,categories=None,sorted_index_column=None,compute=True)
+dask.dataframe.io.to_csv(df,filename,compression=None,**kwargs)
+dask.dataframe.io.to_hdf(df,path_or_buf,key,mode='a',append=False,complevel=0,complib=None,fletcher32=False,get=get_sync,**kwargs)
+dask.dataframe.read_csv(fn,**kwargs)
+dask.dataframe.read_hdf(pattern,key,start=0,stop=None,columns=None,chunksize=1000000,lock=True)
 
 
 ----------------------------------------/dataset/nuaa/anaconda3/envs/dask0.8.0/lib/python3.6/site-packages/dask/store/__init__.py----------------------------------------

@@ -10,6 +10,7 @@
 
 
 
+import ast
 import os
 import re
 import tokenize
@@ -17,6 +18,48 @@ from Path.getPath import *
 from Extract.extractDef import *
 from Extract.extractCall import *
 from Tool.tool import getAst
+
+
+def parseLibrarySource(source,filename='<unknown>'):
+    try:
+        return ast.parse(source,filename=filename,mode='exec')
+    except SyntaxError as originalError:
+        error=originalError
+        replacements={}
+        while True:
+            lines=source.splitlines(keepends=True)
+            if not error.lineno or not error.offset or error.lineno>len(lines):
+                raise error
+            line=lines[error.lineno-1]
+            offset=error.offset-1
+            match=re.match(r'\w+',line[offset:])
+            prefix=line[:offset]
+            if (not match or match.group() not in ('async','await') or
+                    not (prefix.rstrip().endswith('.') or
+                         re.fullmatch(r'\s*(?:from\s+[\w.]+\s+)?import\s+',prefix))):
+                raise error
+            placeholder=f'__pcart_keyword_{len(replacements)}__'
+            while placeholder in source:
+                placeholder+='_'
+            replacements[placeholder]=match.group()
+            lines[error.lineno-1]=line[:offset]+placeholder+line[offset+len(match.group()):]
+            source=''.join(lines)
+            try:
+                root=ast.parse(source,filename=filename,mode='exec')
+                break
+            except SyntaxError as nextError:
+                error=nextError
+        for node in ast.walk(root):
+            if isinstance(node,ast.ImportFrom) and node.module:
+                for placeholder,original in replacements.items():
+                    node.module=node.module.replace(placeholder,original)
+            elif isinstance(node,ast.Attribute):
+                for placeholder,original in replacements.items():
+                    node.attr=node.attr.replace(placeholder,original)
+            elif isinstance(node,ast.alias):
+                for placeholder,original in replacements.items():
+                    node.name=node.name.replace(placeholder,original)
+        return root
 
 
 
@@ -123,6 +166,13 @@ def shortenPath(lst,fileDict,importCache=None): #lst是传入传出参数，保�
         else:
             try:
                 root=getAst(initPath)
+            except SyntaxError:
+                try:
+                    with tokenize.open(initPath) as f:
+                        root=parseLibrarySource(f.read(),initPath)
+                except Exception as e:
+                    print(f"shortenPath --> ast.parse failed: {e}")
+                    return
             except Exception as e:
                 print(f"shortenPath --> ast.parse failed: {e}")
                 return
@@ -179,7 +229,8 @@ def getExportMap(filePath):
         package=def2format.prefix.rsplit('.__init__',1)[0]
         packageParts=package.split('.')
         try:
-            root=getAst(file)
+            with tokenize.open(file) as f:
+                root=parseLibrarySource(f.read(),file)
         except Exception as e:
             print(f"getExportMap --> ast.parse failed: {e}")
             continue
@@ -341,7 +392,7 @@ def getClass(lst,root,prefix,fileDict, pyiFlag=0, importCache=None, exportMap=No
 #  @param exportMap Reverse mapping from definition paths to package re-export paths.
 def task(codeText,libApi,prefix,fileDict, pyiFlag=0, importCache=None, exportMap=None): #这里的prefix只到文件名
     try:
-        rootNode=ast.parse(codeText,filename='<unknown>',mode='exec')
+        rootNode=parseLibrarySource(codeText,list(fileDict.keys())[0])
     except Exception as e:
         file = list(fileDict.keys())[0]
         print(f"{file} ast.parse falied: {e}")
@@ -462,7 +513,7 @@ def getDefFunction(args):
                     print(f"{file} read failed: {e}")
                     continue
             try:
-                root_node=ast.parse(code_text,filename='<unknown>',mode='exec')
+                root_node=parseLibrarySource(code_text,file)
             except Exception as e:
                 print(f'{file} ast.parse failed: {e}')
                 continue
@@ -502,7 +553,7 @@ def getDefFunction(args):
                         code_text=fr.read()
                     task(code_text,pyLst,prefix,fileDict,0,importCache,exportMap) #抽取.py中的API
                     fileVisitLst.append(file.rstrip('i'))
-                    root_node=ast.parse(code_text,filename='<unknown>',mode='exec')
+                    root_node=parseLibrarySource(code_text,file.rstrip('i'))
                     assignDict=getAssign(root_node)
                     f.write('\n'+'-' * 40 + f"{file.rstrip('i')}" + '-' * 40+'\n')
                     for key,value in assignDict.items():
