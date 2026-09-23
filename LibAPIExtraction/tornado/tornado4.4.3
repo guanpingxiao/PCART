@@ -2208,6 +2208,17 @@ tornado.platform.posix.set_close_exec(fd)
 ----------------------------------------/dataset/nuaa/anaconda3/envs/tornado4.4.3/lib/python3.6/site-packages/tornado/test/__main__.py----------------------------------------
 
 
+----------------------------------------/dataset/nuaa/anaconda3/envs/tornado4.4.3/lib/python3.6/site-packages/tornado/test/asyncio_test.py----------------------------------------
+A:tornado.test.asyncio_test.io_loop->AsyncIOLoop()
+A:tornado.test.asyncio_test.namespace->exec_test(globals(), locals(), '\n        @gen.coroutine\n        def f():\n            event_loop = asyncio.get_event_loop()\n            x = yield from event_loop.run_in_executor(None, lambda: 42)\n            return x\n        ')
+tornado.test.asyncio_test.AsyncIOLoopTest(AsyncTestCase)
+tornado.test.asyncio_test.AsyncIOLoopTest.get_new_ioloop(self)
+tornado.test.asyncio_test.AsyncIOLoopTest.test_asyncio_adapter(self)
+tornado.test.asyncio_test.AsyncIOLoopTest.test_asyncio_callback(self)
+tornado.test.asyncio_test.AsyncIOLoopTest.test_asyncio_future(self)
+tornado.test.asyncio_test.AsyncIOLoopTest.test_asyncio_yield_from(self)
+
+
 ----------------------------------------/dataset/nuaa/anaconda3/envs/tornado4.4.3/lib/python3.6/site-packages/tornado/test/template_test.py----------------------------------------
 A:tornado.test.template_test.template->Template('{{ 1 / 2 }}')
 A:tornado.test.template_test.loader->DictLoader({'foo.html': '{% whitespace oneline %}\n    {% for i in range(3) %}\n        {{ i }}\n    {% end %}\n{% whitespace all %}\n    pre\tformatted\n'})
