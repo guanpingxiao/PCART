@@ -12,6 +12,7 @@
 
 import os
 import re
+import tokenize
 from Path.getPath import *
 from Extract.extractDef import *
 from Extract.extractCall import *
@@ -446,7 +447,7 @@ def getDefFunction(args):
             pyiFlag=0
             if file+'i' not in fileVisitLst: #判断.pyi之前是否访问过
                 try:
-                    with open(file+'i','r',encoding='UTF-8') as fr:
+                    with tokenize.open(file+'i') as fr:
                         code_text=fr.read()
                     task(code_text,pyiLst,prefix,fileDict, 1, importCache,exportMap) #抽取.pyi中的API
                     pyiFlag=1
@@ -454,7 +455,7 @@ def getDefFunction(args):
                 except FileNotFoundError:
                     pass
         
-            with open(file,'r',encoding='UTF-8') as fr:
+            with tokenize.open(file) as fr:
                 try:
                     code_text=fr.read()
                 except Exception as e:
@@ -497,7 +498,7 @@ def getDefFunction(args):
             fileVisitLst.append(file)
             if file.rstrip('i') not in fileVisitLst:
                 try:
-                    with open(file.rstrip('i'),'r',encoding='UTF-8') as fr:
+                    with tokenize.open(file.rstrip('i')) as fr:
                         code_text=fr.read()
                     task(code_text,pyLst,prefix,fileDict,0,importCache,exportMap) #抽取.py中的API
                     fileVisitLst.append(file.rstrip('i'))
@@ -513,7 +514,7 @@ def getDefFunction(args):
                 except FileNotFoundError:
                     pass
                 
-            with open(file,'r',encoding='UTF-8') as fr:
+            with tokenize.open(file) as fr:
                 code_text=fr.read()
             task(code_text,pyiLst,prefix,fileDict,1,importCache,exportMap) #抽取.pyi中的API
             removeLst=[]

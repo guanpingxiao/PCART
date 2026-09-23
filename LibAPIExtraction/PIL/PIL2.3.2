@@ -1496,6 +1496,14 @@ PIL.IptcImagePlugin.getiptcinfo(im)
 PIL.IptcImagePlugin.i(c)
 
 
+----------------------------------------/dataset/nuaa/anaconda3/envs/PIL2.3.2/lib/python3.6/site-packages/PIL/WalImageFile.py----------------------------------------
+A:PIL.WalImageFile.fp->builtins.open(filename, 'rb')
+A:PIL.WalImageFile.header->builtins.open(filename, 'rb').read(32 + 24 + 32 + 12)
+A:PIL.WalImageFile.offset->i32(header, 40)
+A:PIL.WalImageFile.im->open('../hacks/sample.wal')
+PIL.WalImageFile.open(filename)
+
+
 ----------------------------------------/dataset/nuaa/anaconda3/envs/PIL2.3.2/lib/python3.6/site-packages/PIL/ImageEnhance.py----------------------------------------
 A:PIL.ImageEnhance.self.degenerate->image.filter(ImageFilter.SMOOTH)
 A:PIL.ImageEnhance.mean->int(ImageStat.Stat(image.convert('L')).mean[0] + 0.5)

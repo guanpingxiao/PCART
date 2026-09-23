@@ -19,6 +19,7 @@ import json
 import hashlib
 import platform
 import shlex
+import tokenize
 from Path.getPath import Path
 
 
@@ -170,7 +171,7 @@ def getParameter(p_string,separator=',',space=1):
 #  @return root The parsed AST root
 def getAst(filePath,strFlag=0): #若strFlag=1,则表明传进来的是一个api，而不是一个路径
     if strFlag==0:
-        with open(filePath,'r',encoding='UTF-8') as f:
+        with tokenize.open(filePath) as f:
             s=f.read()
         root=ast.parse(s,filename='<unknown>',mode='exec')
         return root
