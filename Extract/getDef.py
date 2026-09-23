@@ -20,6 +20,11 @@ from Extract.extractCall import *
 from Tool.tool import getAst
 
 
+## Parse library source containing legacy keyword names in imports or attributes
+## 解析导入路径或属性中含有旧版本关键字名称的库源码
+#  @param source Library source code
+#  @param filename Source filename for syntax errors
+#  @return Parsed AST with the original names restored
 def parseLibrarySource(source,filename='<unknown>'):
     try:
         return ast.parse(source,filename=filename,mode='exec')
@@ -49,6 +54,7 @@ def parseLibrarySource(source,filename='<unknown>'):
                 break
             except SyntaxError as nextError:
                 error=nextError
+        # Restore original names so extracted API paths are not changed.
         for node in ast.walk(root):
             if isinstance(node,ast.ImportFrom) and node.module:
                 for placeholder,original in replacements.items():
