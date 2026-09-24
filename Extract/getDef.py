@@ -11,6 +11,7 @@
 
 
 import ast
+import io
 import os
 import re
 import tokenize
@@ -20,52 +21,96 @@ from Extract.extractCall import *
 from Tool.tool import getAst
 
 
-## Parse library source containing legacy keyword names in imports or attributes
-## 解析导入路径或属性中含有旧版本关键字名称的库源码
+## Parse library source containing legacy names or restricted syntax differences
+## 解析含有旧式名称或有限语法差异的库源码
 #  @param source Library source code
 #  @param filename Source filename for syntax errors
 #  @return Parsed AST with the original names restored
 def parseLibrarySource(source,filename='<unknown>'):
-    try:
-        return ast.parse(source,filename=filename,mode='exec')
-    except SyntaxError as originalError:
-        error=originalError
-        replacements={}
-        while True:
+    replacements={}
+    python2Tried=False
+    while True:
+        try:
+            root=ast.parse(source,filename=filename,mode='exec')
+            break
+        except SyntaxError as error:
             lines=source.splitlines(keepends=True)
-            if not error.lineno or not error.offset or error.lineno>len(lines):
-                raise error
-            line=lines[error.lineno-1]
-            offset=error.offset-1
-            match=re.match(r'\w+',line[offset:])
-            prefix=line[:offset]
-            if (not match or match.group() not in ('async','await') or
-                    not (prefix.rstrip().endswith('.') or
-                         re.fullmatch(r'\s*(?:from\s+[\w.]+\s+)?import\s+',prefix))):
-                raise error
-            placeholder=f'__pcart_keyword_{len(replacements)}__'
-            while placeholder in source:
-                placeholder+='_'
-            replacements[placeholder]=match.group()
-            lines[error.lineno-1]=line[:offset]+placeholder+line[offset+len(match.group()):]
-            source=''.join(lines)
-            try:
-                root=ast.parse(source,filename=filename,mode='exec')
-                break
-            except SyntaxError as nextError:
-                error=nextError
-        # Restore original names so extracted API paths are not changed.
-        for node in ast.walk(root):
-            if isinstance(node,ast.ImportFrom) and node.module:
-                for placeholder,original in replacements.items():
-                    node.module=node.module.replace(placeholder,original)
-            elif isinstance(node,ast.Attribute):
-                for placeholder,original in replacements.items():
-                    node.attr=node.attr.replace(placeholder,original)
-            elif isinstance(node,ast.alias):
-                for placeholder,original in replacements.items():
-                    node.name=node.name.replace(placeholder,original)
+            if error.lineno and error.offset and error.lineno<=len(lines):
+                line=lines[error.lineno-1]
+                offset=error.offset-1
+                match=re.match(r'\w+',line[offset:])
+                if match and match.group() in ('async','await','True','False'):
+                    placeholder=f'__pcart_keyword_{len(replacements)}__'
+                    while placeholder in source:
+                        placeholder+='_'
+                    replacements[placeholder]=match.group()
+                    lines[error.lineno-1]=line[:offset]+placeholder+line[offset+len(match.group()):]
+                    source=''.join(lines)
+                    continue
+
+            if error.msg=='Generator expression must be parenthesized' and error.lineno:
+                try:
+                    tokens=list(tokenize.generate_tokens(io.StringIO(source).readline))
+                except tokenize.TokenError:
+                    tokens=[]
+                brackets=[]
+                for i,token in enumerate(tokens):
+                    if token.type==tokenize.NAME and token.string=='for' and brackets:
+                        brackets[-1][1]=True
+                    if token.type!=tokenize.OP:
+                        continue
+                    if token.string in '([{':
+                        brackets.append([token.string,False])
+                    elif token.string in ')]}':
+                        if brackets:
+                            brackets.pop()
+                    elif (token.string==',' and brackets and brackets[-1]==['(',True] and
+                          error.lineno<=token.start[0]<=error.lineno+2):
+                        nextToken=i+1
+                        while nextToken<len(tokens) and tokens[nextToken].type in (tokenize.NL,tokenize.COMMENT):
+                            nextToken+=1
+                        if nextToken<len(tokens) and tokens[nextToken].string==')':
+                            row,column=token.start
+                            lines[row-1]=lines[row-1][:column]+lines[row-1][column+1:]
+                            source=''.join(lines)
+                            break
+                else:
+                    raise error
+                continue
+
+            # Only run the three syntax fixers needed by old library sources.
+            python2Pattern=r'(?m)^\s*(?:print\s+(?!\()|exec\s+(?!\()|except\s+[^:\n]+,\s*\w+\s*:)'
+            if not python2Tried and re.search(python2Pattern,source):
+                python2Tried=True
+                try:
+                    from lib2to3.refactor import RefactoringTool
+                    fixers=['lib2to3.fixes.fix_print','lib2to3.fixes.fix_except','lib2to3.fixes.fix_exec']
+                    text=source if source.endswith('\n') else source+'\n'
+                    converted=str(RefactoringTool(fixers).refactor_string(text,filename))
+                except Exception:
+                    raise error
+                if converted!=source:
+                    source=converted
+                    continue
+            raise error
+
+    if not replacements:
         return root
+
+    # Restore original names so extracted API paths and signatures are unchanged.
+    for node in ast.walk(root):
+        for field,value in ast.iter_fields(node):
+            if isinstance(value,str):
+                for placeholder,original in replacements.items():
+                    value=value.replace(placeholder,original)
+                setattr(node,field,value)
+            elif isinstance(value,list):
+                for i,item in enumerate(value):
+                    if isinstance(item,str):
+                        for placeholder,original in replacements.items():
+                            item=item.replace(placeholder,original)
+                        value[i]=item
+    return root
 
 
 
@@ -115,18 +160,30 @@ class RegexMatch:
 ## 通过AST获取.py文件的Assign语句
 #
 #  @param root_node The ast node of the .py file
-def getAssign(root_node):
+#  @param filePath Source filename for diagnostics
+def getAssign(root_node,filePath=None):
     #找出树中所有的模块名
     import_visitor=Import()
     try:
-        import_visitor.visit(root_node)
+        # Preserve NodeVisitor's depth-first order without recursive calls.
+        nodes=[root_node]
+        while nodes:
+            node=nodes.pop()
+            if isinstance(node,(ast.Import,ast.ImportFrom)):
+                import_visitor.visit(node)
+            nodes.extend(reversed(list(ast.iter_child_nodes(node))))
     except Exception as e:
-        print(f"import visit failed: {e}")
+        print(f"{filePath or '<unknown>'} import visit failed: {e}")
     md_names=import_visitor.get_md_name() #dict
 
     #找出所有的Assign节点
     assign_visitor=AssignVisitor()
-    assign_visitor.visit(root_node)
+    nodes=[root_node]
+    while nodes:
+        node=nodes.pop()
+        if isinstance(node,ast.Assign):
+            assign_visitor.visit(node)
+        nodes.extend(reversed(list(ast.iter_child_nodes(node))))
     target_call=assign_visitor.get_target_call()
     
     for key,val in target_call.items():
@@ -523,7 +580,7 @@ def getDefFunction(args):
             except Exception as e:
                 print(f'{file} ast.parse failed: {e}')
                 continue
-            assignDict=getAssign(root_node) #抽取.py中的所有Assign Node
+            assignDict=getAssign(root_node,file) #抽取.py中的所有Assign Node
             f.write('\n'+'-' * 40 + f"{file}" + '-' * 40+'\n')
             for key,val in assignDict.items():
                 writeApiLine(f,f'A:{prefix}.{key}->{val}',publicAliasSource,publicAliasTarget)
@@ -560,7 +617,7 @@ def getDefFunction(args):
                     task(code_text,pyLst,prefix,fileDict,0,importCache,exportMap) #抽取.py中的API
                     fileVisitLst.append(file.rstrip('i'))
                     root_node=parseLibrarySource(code_text,file.rstrip('i'))
-                    assignDict=getAssign(root_node)
+                    assignDict=getAssign(root_node,file.rstrip('i'))
                     f.write('\n'+'-' * 40 + f"{file.rstrip('i')}" + '-' * 40+'\n')
                     for key,value in assignDict.items():
                         writeApiLine(f,f'A:{prefix}.{key}->{value}',publicAliasSource,publicAliasTarget)
